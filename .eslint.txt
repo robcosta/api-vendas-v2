@@ -1,0 +1,5 @@
+Site de configuração do Eslint:
+  https://blog.cod3r.com.br/organizacao-e-padronizacao-com-eslint/
+
+
+  "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules src/shared/http/server.ts",
