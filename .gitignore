@@ -8,5 +8,8 @@ coverage
 ormconfig.json
 dist
 
+dicas.txt
+eslint.txt
+
 uploads/*
 !uploads/.gitkeep
