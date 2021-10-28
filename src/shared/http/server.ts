@@ -1,11 +1,11 @@
-import 'reflect-metadata';
+import 'reflect-metadata'; //Usado pelo typeorm é necessita ser a primeira importação
 import express, { NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
 import cors from 'cors';
 import { errors } from 'celebrate';
 import routes from './routes/index';
 import AppError from '@shared/errors/AppError';
-import '@shared/typeorm'; //como  arquivo é index.ts não precisa do nome
+import '@shared/typeorm'; //'@shared/typeorm/index.ts'->como  arquivo é index.ts não precisa do nome
 
 const app = express();
 
