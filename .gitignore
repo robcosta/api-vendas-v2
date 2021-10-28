@@ -9,7 +9,7 @@ ormconfig.json
 dist
 
 dicas.txt
-eslint.txt
+Comandos_Docker.jpg
 
 uploads/*
 !uploads/.gitkeep

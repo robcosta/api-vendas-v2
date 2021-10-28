@@ -25,7 +25,7 @@ export class CreateProducts1635331496923 implements MigrationInterface {
             scale: 2,
           },
           {
-            name: 'quantiy',
+            name: 'quantity',
             type: 'int',
           },
           {
@@ -34,7 +34,7 @@ export class CreateProducts1635331496923 implements MigrationInterface {
             default: 'now()',
           },
           {
-            name: 'update_at',
+            name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
           },
