@@ -3,6 +3,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
 import cors from 'cors';
 import { errors } from 'celebrate';
+import { MulterError } from 'multer';
 import routes from './routes/index';
 import AppError from '@shared/errors/AppError';
 import '@shared/typeorm'; //'@shared/typeorm/index.ts'->como  arquivo é index.ts não precisa do nome
@@ -22,7 +23,12 @@ app.use(
         message: error.message,
       });
     }
-
+    if (error instanceof MulterError) {
+      return response.status(401).json({
+        status: 'error',
+        message: error.code,
+      });
+    }
     return response.status(500).json({
       status: 'error',
       message: 'Internal server error',

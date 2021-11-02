@@ -4,7 +4,7 @@ import fs from 'fs';
 import { getCustomRepository } from 'typeorm';
 import User from '../typeorm/entities/User';
 import UsersRepository from '../typeorm/repositories/UsersRepository';
-import uploadConfig from '@config/upload';
+import { uploadFolder, resizeImage } from '@config/upload';
 
 interface IRequest {
   user_id: string;
@@ -21,15 +21,32 @@ class UpdateUserAvatarService {
     if (!user) {
       throw new AppError('User not found.');
     }
+    //Verifica se foi enviado algum arquivo de imagem
+    if (!avatarFilename) {
+      if (user.avatar !== 'defaultAvatar.png' && user.avatar) {
+        const userAvatarFilePath = path.join(uploadFolder, user.avatar);
+        const userAvatarFileExists = fs.existsSync(userAvatarFilePath);
+        if (userAvatarFileExists) {
+          await fs.promises.unlink(userAvatarFilePath);
+        }
+      }
+      user.avatar = 'defaultAvatar.png';
+      await usersRepository.save(user);
+      throw new AppError('Image not send.');
+    }
+
+    await resizeImage(avatarFilename);
+    //console.log('USER:', user);
 
     if (user.avatar !== 'defaultAvatar.png' && user.avatar) {
-      const userAvatarFilePath = path.join(uploadConfig.directory, user.avatar);
-      const userAvatarFileExists = await fs.promises.stat(userAvatarFilePath);
+      const userAvatarFilePath = path.join(uploadFolder, user.avatar);
+      const userAvatarFileExists = fs.existsSync(userAvatarFilePath);
       if (userAvatarFileExists) {
         await fs.promises.unlink(userAvatarFilePath);
       }
     }
-    user.avatar = avatarFilename ? avatarFilename : 'defaultAvatar.png';
+
+    user.avatar = avatarFilename;
     await usersRepository.save(user);
     return user;
   }
