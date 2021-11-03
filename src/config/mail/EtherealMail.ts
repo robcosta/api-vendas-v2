@@ -29,22 +29,27 @@ export default class EtherealMail {
     templateData,
   }: ISendMail): Promise<void> {
     const mailTemplate = new HandlebarsMailTemplate();
-    // console.log('Aqui chegou&&&&&, antes do nodemailer.createTestAccount()');
-    const account = await nodemailer.createTestAccount();
-    //console.log('ACCOUNT_NODEMAILER', account);
+    //const account = await nodemailer.createTestAccount();
 
     const transporter = nodemailer.createTransport({
-      host: account.smtp.host,
-      port: account.smtp.port,
-      secure: account.smtp.secure,
+      host: 'smtp.mailtrap.io',
+      port: 2525,
       auth: {
-        user: account.user,
-        pass: account.pass,
-      },
-      tls: {
-        rejectUnauthorized: false,
+        user: '82aabbd991cea2',
+        pass: '6e6239d1d4ed7e',
       },
     });
+    // host: account.smtp.host,
+    // port: account.smtp.port,
+    // secure: false, // account.smtp.secure,
+    // auth: {
+    //   user: account.user,
+    //   pass: account.pass,
+    // },
+    // tls: {
+    //   rejectUnauthorized: false,
+    // },
+    // });
 
     const message = await transporter.sendMail({
       from: {
