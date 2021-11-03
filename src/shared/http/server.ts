@@ -1,6 +1,6 @@
 import 'reflect-metadata'; //Usado pelo typeorm é necessita ser a primeira importação
 import express, { NextFunction, Request, Response } from 'express';
-//import 'express-async-errors';
+import 'express-async-errors';
 import cors from 'cors';
 import { errors } from 'celebrate';
 import { MulterError } from 'multer';
@@ -33,6 +33,9 @@ app.use(
         message: error.code,
       });
     }
+
+    console.log(error);
+
     return response.status(500).json({
       status: 'error',
       message: 'Internal server error',

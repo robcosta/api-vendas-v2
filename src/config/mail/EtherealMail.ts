@@ -10,7 +10,7 @@ interface ITemplateVariable {
 }
 
 interface IParseMailTemplate {
-  template: string;
+  file: string;
   variables: ITemplateVariable;
 }
 
@@ -29,8 +29,10 @@ export default class EtherealMail {
     templateData,
   }: ISendMail): Promise<void> {
     const mailTemplate = new HandlebarsMailTemplate();
-
+    // console.log('Aqui chegou&&&&&, antes do nodemailer.createTestAccount()');
     const account = await nodemailer.createTestAccount();
+    //console.log('ACCOUNT_NODEMAILER', account);
+
     const transporter = nodemailer.createTransport({
       host: account.smtp.host,
       port: account.smtp.port,
