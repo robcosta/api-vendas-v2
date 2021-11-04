@@ -25,7 +25,7 @@ class ResetPasswordService {
     if (!user) {
       throw new AppError('User does not exist.');
     }
-    //Verificando se o token ainda está np prazo de validade (2 horas) usando 'date-fns' para
+    //Verificando se o token ainda está np prazo de validade (2 horas após sau criação) usando 'date-fns' para
     const tokenCreatedAt = userToken.created_at;
     //Adiciona mais duas horas na data de criação do token
     const compareDate = addHours(tokenCreatedAt, 2);
