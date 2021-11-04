@@ -24,15 +24,15 @@ class CustomersController {
   public async create(request: Request, response: Response): Promise<Response> {
     const { name, email } = request.body;
     const createCustomer = new CreateCustomerService();
-    const customer = createCustomer.execute({ name, email });
+    const customer = await createCustomer.execute({ name, email });
 
     return response.json(customer);
   }
 
   public async update(request: Request, response: Response): Promise<Response> {
-    const { id, name, email } = request.body;
+    const { id } = request.params;
+    const { name, email } = request.body;
     const updateCustomer = new UpdateCustomerService();
-
     const customer = await updateCustomer.execute({ id, name, email });
 
     return response.json(customer);
