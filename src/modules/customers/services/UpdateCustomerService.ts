@@ -1,3 +1,4 @@
+import RedisCache from '@shared/cache/RedisCache';
 import AppError from '@shared/errors/AppError';
 import { getCustomRepository } from 'typeorm';
 import Customer from '../typeorm/entities/Customer';
@@ -26,6 +27,10 @@ class UpdateCustomerService {
     }
     customer.name = name ? name : customer.name;
     customer.email = email ? email : customer.email;
+
+    const redisCache = new RedisCache();
+
+    await redisCache.invalidate('api-vendas-CUSTOMER_LIST');
 
     await customerRepository.save(customer);
 
