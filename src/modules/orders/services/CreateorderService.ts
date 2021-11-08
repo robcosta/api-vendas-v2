@@ -1,5 +1,5 @@
 import AppError from '@shared/errors/AppError';
-import { getCustomRepository } from 'typeorm';
+import { getCustomRepository, getConnection } from 'typeorm';
 import Order from '../typeorm/entities/Order';
 import OrdersRepository from '@modules/orders/typeorm/repositories/OrdersRepository';
 import CustomersRepository from '@modules/customers/typeorm/repositories/CustomersRepository';
@@ -63,24 +63,28 @@ class CreateOrderService {
       price: existsProducts.filter(p => p.id === product.id)[0].price,
     }));
 
-    const order = await ordersRepository.createOrder({
-      customer: customerExists,
-      products: serializedProducts,
+    const transactionOrder = await getConnection().transaction(async () => {
+      const order = await ordersRepository.createOrder({
+        customer: customerExists,
+        products: serializedProducts,
+      });
+
+      //Ataulizando as quantidades dos produtos na tabela produtos
+      const { order_products } = order;
+
+      const updatedProductQauntity = order_products.map(product => ({
+        id: product.product_id,
+        quantity:
+          existsProducts.filter(p => p.id === product.product_id)[0].quantity -
+          product.quantity,
+      }));
+
+      await productsRepository.save(updatedProductQauntity);
+
+      return order;
     });
 
-    //Ataulizando as quantidades dos produtos na tabela produtos
-    const { order_products } = order;
-
-    const updatedProductQauntity = order_products.map(product => ({
-      id: product.product_id,
-      quantity:
-        existsProducts.filter(p => p.id === product.product_id)[0].quantity -
-        product.quantity,
-    }));
-
-    await productsRepository.save(updatedProductQauntity);
-
-    return order;
+    return transactionOrder;
   }
 }
 
