@@ -1,4 +1,5 @@
 import 'reflect-metadata'; //Usado pelo typeorm é necessita ser a primeira importação
+import 'dotenv/config';
 import express, { NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
 import cors from 'cors';
@@ -45,6 +46,6 @@ app.use(
   },
 );
 
-app.listen(3333, () => {
+app.listen(process.env.APP_API_URL_PORT, () => {
   console.log('Server started on port 3333! 🙌');
 });
