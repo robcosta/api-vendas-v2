@@ -7,7 +7,8 @@
     "dev": "ts-node-dev -r tsconfig-paths/register --inspect --transpile-only --ignore-watch node_modules src/shared/http/server.ts",
     "lint": "eslint . --ext .ts",
     "lint-fix": "eslint . --ext .ts --fix",
-    "typeorm": "ts-node-dev -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
+    "typeorm": "ts-node-dev -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "docker": "docker start postgres redis redis-client"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
@@ -49,6 +50,7 @@
     "multer": "^1.4.3",
     "nodemailer": "^6.7.0",
     "pg": "^8.7.1",
+    "rate-limiter-flexible": "^2.3.4",
     "redis": "^3.1.2",
     "reflect-metadata": "^0.1.13",
     "sharp": "^0.29.2",

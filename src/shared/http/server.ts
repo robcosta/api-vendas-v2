@@ -10,11 +10,13 @@ import routes from './routes/index';
 import AppError from '@shared/errors/AppError';
 import '@shared/typeorm'; //'@shared/typeorm/index.ts'->como  arquivo é index.ts não precisa do nome
 import path from 'path';
+import rateLimiter from '@shared/http/middlewares/rateLimiter';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(rateLimiter);
 app.use(pagination);
 app.use(routes);
 app.use(errors()); //Possíveis erros gerados na validação dos dados do usuário
