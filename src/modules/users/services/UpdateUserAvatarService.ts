@@ -4,7 +4,8 @@ import fs from 'fs';
 import { getCustomRepository } from 'typeorm';
 import User from '../typeorm/entities/User';
 import UsersRepository from '../typeorm/repositories/UsersRepository';
-import { uploadFolder, resizeImage } from '@config/upload';
+//import { uploadFolder, resizeImage } from '@config/upload';
+import DiskStorageProvider from '@shared/providers/StorageProvider/DiskStorageProvider';
 
 interface IRequest {
   user_id: string;
@@ -17,34 +18,26 @@ class UpdateUserAvatarService {
     avatarFilename,
   }: IRequest): Promise<User | undefined> {
     const usersRepository = getCustomRepository(UsersRepository);
+
+    const storageProvider = new DiskStorageProvider();
+
     const user = await usersRepository.findById(user_id);
     if (!user) {
       throw new AppError('User not found.');
     }
     //Verifica se foi enviado algum arquivo de imagem
     if (!avatarFilename) {
-      if (user.avatar !== 'defaultAvatar.png' && user.avatar) {
-        const userAvatarFilePath = path.join(uploadFolder, user.avatar);
-        const userAvatarFileExists = fs.existsSync(userAvatarFilePath);
-        if (userAvatarFileExists) {
-          await fs.promises.unlink(userAvatarFilePath);
-        }
+      if (user.avatar !== 'defaultAvatar.png') {
+        await storageProvider.deleteFile(user.avatar, 'directory');
       }
       user.avatar = 'defaultAvatar.png';
       await usersRepository.save(user);
       throw new AppError('Image not send.');
     }
 
-    await resizeImage(avatarFilename);
-    //console.log('USER:', user);
-
-    if (user.avatar !== 'defaultAvatar.png' && user.avatar) {
-      const userAvatarFilePath = path.join(uploadFolder, user.avatar);
-      const userAvatarFileExists = fs.existsSync(userAvatarFilePath);
-      if (userAvatarFileExists) {
-        await fs.promises.unlink(userAvatarFilePath);
-      }
-    }
+    await storageProvider.deleteFile(user.avatar, 'directory');
+    await storageProvider.saveFile(avatarFilename);
+    await storageProvider.deleteFile(avatarFilename, 'tmpFolder');
 
     user.avatar = avatarFilename;
     await usersRepository.save(user);

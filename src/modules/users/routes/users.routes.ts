@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { celebrate, Joi, Segments } from 'celebrate';
-import { uploadMulter } from '@config/upload';
+import uploadConfig from '@config/upload';
 import UsersController from '../controllers/UsersController';
 import isAuthenticated from '@shared/http/middlewares/isAuthenticated';
 import UsersAvatarController from '../controllers/UsersAvatarController';
@@ -26,7 +26,7 @@ userRouter.post(
 userRouter.patch(
   '/avatar',
   isAuthenticated,
-  uploadMulter.single('avatar'),
+  uploadConfig.uploadMulter.single('avatar'),
   usersAvatarController.update,
 );
 
