@@ -40,20 +40,7 @@ export default class EtherealMail {
       },
     });
 
-    /* Ethereal */
-    // host: account.smtp.host,
-    // port: account.smtp.port,
-    // secure: false, // account.smtp.secure,
-    // auth: {
-    //   user: account.user,
-    //   pass: account.pass,
-    // },
-    // tls: {
-    //   rejectUnauthorized: false,
-    // },
-    // });
-
-    const message = await transporter.sendMail({
+    await transporter.sendMail({
       from: {
         name: from?.name || 'Equipe API Vendas',
         address: from?.email || 'equipe@apivendas.com.br',
@@ -65,9 +52,5 @@ export default class EtherealMail {
       subject,
       html: await mailTemplate.parse(templateData),
     });
-
-    console.log('Message sent: %s', message.messageId);
-
-    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(message));
   }
 }

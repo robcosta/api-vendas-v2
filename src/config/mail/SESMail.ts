@@ -1,5 +1,7 @@
 import nodemailer from 'nodemailer';
+import aws from 'aws-sdk';
 import HandlebarsMailTemplate from './HandlebarsMailTemplate';
+import mailConfig from '@config/mail/mail';
 
 interface IMailContact {
   name: string;
@@ -21,7 +23,7 @@ interface ISendMail {
   templateData: IParseMailTemplate;
 }
 
-export default class EtherealMail {
+export default class SESMail {
   static async sendMail({
     from,
     to,
@@ -29,34 +31,18 @@ export default class EtherealMail {
     templateData,
   }: ISendMail): Promise<void> {
     const mailTemplate = new HandlebarsMailTemplate();
-    //const account = await nodemailer.createTestAccount();
 
     const transporter = nodemailer.createTransport({
-      host: 'smtp.mailtrap.io',
-      port: 2525,
-      auth: {
-        user: '82aabbd991cea2',
-        pass: '6e6239d1d4ed7e',
-      },
+      SES: new aws.SES({
+        apiVersion: '2010-12-01',
+      }),
     });
 
-    /* Ethereal */
-    // host: account.smtp.host,
-    // port: account.smtp.port,
-    // secure: false, // account.smtp.secure,
-    // auth: {
-    //   user: account.user,
-    //   pass: account.pass,
-    // },
-    // tls: {
-    //   rejectUnauthorized: false,
-    // },
-    // });
-
+    const { email, name } = mailConfig.defaults.from;
     const message = await transporter.sendMail({
       from: {
-        name: from?.name || 'Equipe API Vendas',
-        address: from?.email || 'equipe@apivendas.com.br',
+        name: from?.name || name,
+        address: from?.email || email,
       },
       to: {
         name: to.name,
@@ -65,7 +51,6 @@ export default class EtherealMail {
       subject,
       html: await mailTemplate.parse(templateData),
     });
-
     console.log('Message sent: %s', message.messageId);
 
     console.log('Preview URL: %s', nodemailer.getTestMessageUrl(message));
