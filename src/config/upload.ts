@@ -1,6 +1,18 @@
 import path from 'path';
-import multer from 'multer';
+import multer, { Multer } from 'multer';
 import crypto from 'crypto';
+
+interface IUploadConfig {
+  driver: 's3' | 'disk';
+  tmpFolder: string;
+  directory: string;
+  multer: Multer;
+  config: {
+    aws: {
+      bucket: string;
+    };
+  };
+}
 
 const uploadFolder = path.resolve(__dirname, '..', '..', 'uploads');
 
@@ -27,7 +39,13 @@ const uploadMulter = multer({
 });
 
 export default {
+  driver: process.env.STORAGE_DRIVER,
   directory: uploadFolder,
   tmpFolder,
-  uploadMulter,
-};
+  multer: uploadMulter,
+  config: {
+    aws: {
+      bucket: process.env.BUCKET_S3,
+    },
+  },
+} as IUploadConfig;

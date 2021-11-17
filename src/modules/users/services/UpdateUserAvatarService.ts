@@ -4,8 +4,10 @@ import fs from 'fs';
 import { getCustomRepository } from 'typeorm';
 import User from '../typeorm/entities/User';
 import UsersRepository from '../typeorm/repositories/UsersRepository';
-//import { uploadFolder, resizeImage } from '@config/upload';
+import uploadConfig from '@config/upload';
 import DiskStorageProvider from '@shared/providers/StorageProvider/DiskStorageProvider';
+import S3StorageProvidet from '@shared/providers/StorageProvider/S3StorageProvider';
+import S3StorageProvider from '@shared/providers/StorageProvider/S3StorageProvider';
 
 interface IRequest {
   user_id: string;
@@ -19,12 +21,19 @@ class UpdateUserAvatarService {
   }: IRequest): Promise<User | undefined> {
     const usersRepository = getCustomRepository(UsersRepository);
 
-    const storageProvider = new DiskStorageProvider();
-
+    // Verifica se o usuário existe
     const user = await usersRepository.findById(user_id);
     if (!user) {
       throw new AppError('User not found.');
     }
+
+    let storageProvider = new DiskStorageProvider();
+
+    // Verifica o local de armazenamento é na nuvem (Amazon S3)
+    if (uploadConfig.driver === 's3') {
+      storageProvider = new S3StorageProvider();
+    }
+
     //Verifica se foi enviado algum arquivo de imagem
     if (!avatarFilename) {
       if (user.avatar !== 'defaultAvatar.png') {
