@@ -1,4 +1,4 @@
-import RedisCache from '@shared/cache/RedisCache';
+import redisCache from '@shared/cache/RedisCache';
 import AppError from '@shared/errors/AppError';
 import { getCustomRepository } from 'typeorm';
 import CustomersRepository from '../typeorm/repositories/CustomersRepository';
@@ -16,7 +16,7 @@ class DeleteCustomerService {
       throw new AppError('Customer not found.');
     }
 
-    const redisCache = new RedisCache();
+    //const redisCache = new RedisCache();
 
     await redisCache.invalidate('api-vendas-CUSTOMER_LIST');
 

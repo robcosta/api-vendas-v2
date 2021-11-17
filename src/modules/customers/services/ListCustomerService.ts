@@ -1,4 +1,4 @@
-import RedisCache from '@shared/cache/RedisCache';
+import redisCache from '@shared/cache/RedisCache';
 import { getCustomRepository } from 'typeorm';
 import { PaginationAwareObject } from 'typeorm-pagination/dist/helpers/pagination';
 import CustomersRepository from '../typeorm/repositories/CustomersRepository';
@@ -18,7 +18,7 @@ class ListCustomerService {
   public async execute(): Promise<PaginationAwareObject> {
     const customerRepository = getCustomRepository(CustomersRepository);
 
-    const redisCache = new RedisCache();
+    // const redisCache = new RedisCache();
 
     let customers = await redisCache.recover<PaginationAwareObject>(
       'api-vendas-CUSTOMER_LIST',
