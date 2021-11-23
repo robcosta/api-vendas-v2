@@ -1,7 +1,7 @@
 import redisCache from '@shared/cache/RedisCache';
 import { getCustomRepository } from 'typeorm';
 import { PaginationAwareObject } from 'typeorm-pagination/dist/helpers/pagination';
-import ProductRepository from '../typeorm/repositories/ProductsRepository';
+import ProductRepository from '../infra/typeorm/repositories/ProductsRepository';
 
 class ListProductService {
   public async execute(): Promise<PaginationAwareObject> {

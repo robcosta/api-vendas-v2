@@ -1,7 +1,7 @@
 import redisCache from '@shared/cache/RedisCache';
 import { getCustomRepository } from 'typeorm';
 import { PaginationAwareObject } from 'typeorm-pagination/dist/helpers/pagination';
-import CustomersRepository from '../typeorm/repositories/CustomersRepository';
+import CustomersRepository from '../infra/typeorm/repositories/CustomersRepository';
 //import Customer from '../typeorm/entities/Customer';
 
 // interface IPaginateCustomer {
