@@ -13,7 +13,6 @@ import path from 'path';
 import rateLimiter from '@shared/infra/http/middlewares/rateLimiter';
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 app.use(rateLimiter);
