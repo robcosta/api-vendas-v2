@@ -3,7 +3,7 @@ import { IListCustomer } from '@modules/customers/domain/models/IListCustomer';
 import { ICustomersRepository } from '@modules/customers/domain/repositories/ICustomersRepository';
 import { getRepository, Repository } from 'typeorm';
 // import { PaginationAwareObject } from 'typeorm-pagination/dist/helpers/pagination';
-import Customer from '../Customer';
+import Customer from '../entities/Customer';
 
 class CustomersRepository implements ICustomersRepository {
   private ormRepository: Repository<Customer>;

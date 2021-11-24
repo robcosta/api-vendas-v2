@@ -1,20 +1,22 @@
 import redisCache from '@shared/cache/RedisCache';
-import { getCustomRepository } from 'typeorm';
-import { PaginationAwareObject } from 'typeorm-pagination/dist/helpers/pagination';
-import ProductRepository from '../infra/typeorm/repositories/ProductsRepository';
+import { inject, injectable } from 'tsyringe';
+import { IListProduct } from '../domain/models/IListProduct';
+import { IProductsRepository } from '../domain/repositories/IProductsRepository';
 
+@injectable()
 class ListProductService {
-  public async execute(): Promise<PaginationAwareObject> {
-    const productsRepository = getCustomRepository(ProductRepository);
+  constructor(
+    @inject('ProductsRepository')
+    private productsRepository: IProductsRepository,
+  ) {}
 
-    //const redisCache = new RedisCache();
-
-    let products = await redisCache.recover<PaginationAwareObject>(
+  public async execute(): Promise<IListProduct> {
+    let products = await redisCache.recover<IListProduct>(
       'api-vendas-PRODUCT_LIST',
     );
 
     if (!products) {
-      products = await productsRepository.createQueryBuilder().paginate();
+      products = await this.productsRepository.findAll();
       await redisCache.save('api-vendas-PRODUCT_LIST', products);
     }
 

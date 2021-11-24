@@ -4,7 +4,7 @@ import { getCustomRepository } from 'typeorm';
 import { ICustomerId } from '../domain/models/ICustomerId';
 import { ICustomersRepository } from '../domain/repositories/ICustomersRepository';
 import Customer from '../infra/typeorm/entities/Customer';
-import CustomersRepository from '../infra/typeorm/entities/repositories/CustomersRepository';
+import CustomersRepository from '../infra/typeorm/repositories/CustomersRepository';
 
 @injectable()
 class ShowCustomerService {
