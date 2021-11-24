@@ -1,26 +1,26 @@
 import redisCache from '@shared/cache/RedisCache';
 import AppError from '@shared/errors/AppError';
-import { getCustomRepository } from 'typeorm';
-import CustomersRepository from '../infra/typeorm/repositories/CustomersRepository';
+import { ICustomerId } from '@modules/customers/domain/models/ICustomerId';
+import { inject, injectable } from 'tsyringe';
+import { ICustomersRepository } from '../domain/repositories/ICustomersRepository';
 
-interface IRequest {
-  id: string;
-}
-
+@injectable()
 class DeleteCustomerService {
-  public async execute({ id }: IRequest): Promise<void> {
-    const customerRepository = getCustomRepository(CustomersRepository);
-    const customer = await customerRepository.findOne(id);
+  constructor(
+    @inject('CustomersRepository')
+    private customersRepository: ICustomersRepository,
+  ) {}
+
+  public async execute({ id }: ICustomerId): Promise<void> {
+    const customer = await this.customersRepository.findById(id);
 
     if (!customer) {
       throw new AppError('Customer not found.');
     }
 
-    //const redisCache = new RedisCache();
-
     await redisCache.invalidate('api-vendas-CUSTOMER_LIST');
 
-    await customerRepository.remove(customer);
+    await this.customersRepository.remove(customer);
 
     return;
   }

@@ -1,26 +1,30 @@
 import redisCache from '@shared/cache/RedisCache';
 import AppError from '@shared/errors/AppError';
-import { getCustomRepository } from 'typeorm';
+import { inject, injectable } from 'tsyringe';
+import { IUpdateCustomer } from '../domain/models/IUpdateCustomer';
+import { ICustomersRepository } from '../domain/repositories/ICustomersRepository';
 import Customer from '../infra/typeorm/entities/Customer';
-import CustomersRepository from '../infra/typeorm/repositories/CustomersRepository';
 
-interface IRequest {
-  id: string;
-  name?: string;
-  email?: string;
-}
-
+@injectable()
 class UpdateCustomerService {
-  public async execute({ id, name, email }: IRequest): Promise<Customer> {
-    const customerRepository = getCustomRepository(CustomersRepository);
-    const customer = await customerRepository.findById(id);
+  constructor(
+    @inject('CustomersRepository')
+    private customersRepository: ICustomersRepository,
+  ) {}
+
+  public async execute({
+    id,
+    name,
+    email,
+  }: IUpdateCustomer): Promise<Customer> {
+    const customer = await this.customersRepository.findById(id);
 
     if (!customer) {
       throw new AppError('Customer not found.');
     }
 
     if (email) {
-      const customerExists = await customerRepository.findByEmail(email);
+      const customerExists = await this.customersRepository.findByEmail(email);
       if (customerExists && email !== customer.email) {
         throw new AppError('There is already one customer with this email.');
       }
@@ -32,7 +36,7 @@ class UpdateCustomerService {
 
     await redisCache.invalidate('api-vendas-CUSTOMER_LIST');
 
-    await customerRepository.save(customer);
+    await this.customersRepository.save(customer);
 
     return customer;
   }

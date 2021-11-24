@@ -9,6 +9,7 @@ import { MulterError } from 'multer';
 import routes from './routes/index';
 import AppError from '@shared/errors/AppError';
 import '@shared/infra/typeorm'; //'@shared/typeorm/index.ts'->como  arquivo é index.ts não precisa do nome
+import '@shared/container';
 import path from 'path';
 import rateLimiter from '@shared/infra/http/middlewares/rateLimiter';
 

@@ -1,7 +1,9 @@
 import { ICreateCustomer } from '@modules/customers/domain/models/ICreateCustomer';
+import { IListCustomer } from '@modules/customers/domain/models/IListCustomer';
 import { ICustomersRepository } from '@modules/customers/domain/repositories/ICustomersRepository';
 import { getRepository, Repository } from 'typeorm';
-import Customer from '../entities/Customer';
+// import { PaginationAwareObject } from 'typeorm-pagination/dist/helpers/pagination';
+import Customer from '../Customer';
 
 class CustomersRepository implements ICustomersRepository {
   private ormRepository: Repository<Customer>;
@@ -20,6 +22,10 @@ class CustomersRepository implements ICustomersRepository {
     return customer;
   }
 
+  public async remove(customer: Customer): Promise<void> {
+    await this.ormRepository.remove(customer);
+  }
+
   public async findByName(name: string): Promise<Customer | undefined> {
     const customer = await this.ormRepository.findOne({
       where: { name },
@@ -27,6 +33,7 @@ class CustomersRepository implements ICustomersRepository {
 
     return customer;
   }
+
   public async findById(id: string): Promise<Customer | undefined> {
     const customer = await this.ormRepository.findOne({
       where: { id },
@@ -34,12 +41,17 @@ class CustomersRepository implements ICustomersRepository {
 
     return customer;
   }
+
   public async findByEmail(email: string): Promise<Customer | undefined> {
     const customer = await this.ormRepository.findOne({
       where: { email },
     });
-
     return customer;
+  }
+
+  public async findAll(): Promise<IListCustomer> {
+    const customers = await this.ormRepository.createQueryBuilder().paginate();
+    return customers as IListCustomer;
   }
 }
 

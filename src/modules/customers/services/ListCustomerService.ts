@@ -1,8 +1,7 @@
 import redisCache from '@shared/cache/RedisCache';
-import { getCustomRepository } from 'typeorm';
-import { PaginationAwareObject } from 'typeorm-pagination/dist/helpers/pagination';
-import CustomersRepository from '../infra/typeorm/repositories/CustomersRepository';
-//import Customer from '../typeorm/entities/Customer';
+import { inject, injectable } from 'tsyringe';
+import { IListCustomer } from '../domain/models/IListCustomer';
+import { ICustomersRepository } from '../domain/repositories/ICustomersRepository';
 
 // interface IPaginateCustomer {
 //   from: number;
@@ -14,18 +13,20 @@ import CustomersRepository from '../infra/typeorm/repositories/CustomersReposito
 //   next_page: number | null;
 //   data: Customer[];
 // }
+@injectable()
 class ListCustomerService {
-  public async execute(): Promise<PaginationAwareObject> {
-    const customerRepository = getCustomRepository(CustomersRepository);
+  constructor(
+    @inject('CustomersRepository')
+    private customerRepository: ICustomersRepository,
+  ) {}
 
-    // const redisCache = new RedisCache();
-
-    let customers = await redisCache.recover<PaginationAwareObject>(
+  public async execute(): Promise<IListCustomer> {
+    let customers = await redisCache.recover<IListCustomer>(
       'api-vendas-CUSTOMER_LIST',
     );
 
     if (!customers) {
-      customers = await customerRepository.createQueryBuilder().paginate();
+      customers = await this.customerRepository.findAll();
       await redisCache.save('api-vendas-CUSTOMER_LIST', customers);
     }
 

@@ -39,7 +39,7 @@ customersRouter.put(
     },
     [Segments.BODY]: {
       name: Joi.string(),
-      email: Joi.string(),
+      email: Joi.string().email(),
     },
   }),
   customersController.update,
