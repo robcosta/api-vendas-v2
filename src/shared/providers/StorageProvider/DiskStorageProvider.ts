@@ -1,17 +1,12 @@
 import uploadConfig from '@config/upload';
+import ImageSize from '@shared/image/imageSize';
 import fs from 'fs';
 import path from 'path';
-import sharp from 'sharp';
 
 export default class DiskStorageProvider {
   public async saveFile(file: string): Promise<string> {
-    const imageSize = Number(process.env.IMAGE_SIZE);
-    await sharp(path.join(uploadConfig.tmpFolder, file))
-      .resize(imageSize)
-      .toFormat('jpeg')
-      .toFile(path.join(uploadConfig.directory, file));
-
-    return file;
+    const image = new ImageSize().resizeImage(file);
+    return image;
   }
 
   public async deleteFile(
