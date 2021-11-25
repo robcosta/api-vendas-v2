@@ -1,13 +1,16 @@
-import { getCustomRepository } from 'typeorm';
+import { inject, injectable } from 'tsyringe';
 import { PaginationAwareObject } from 'typeorm-pagination/dist/helpers/pagination';
-import User from '../infra/typeorm/entities/User';
-import UsersRepository from '../infra/typeorm/repositories/UsersRepository';
+import { IUsersRepository } from '../domain/repositories/IUsersRepository';
 
+@injectable()
 class ListUserService {
-  public async execute(): Promise<PaginationAwareObject> {
-    const usersRepository = getCustomRepository(UsersRepository);
+  constructor(
+    @inject('UsersRepository')
+    private usersRepository: IUsersRepository,
+  ) {}
 
-    const users = await usersRepository.createQueryBuilder().paginate();
+  public async execute(): Promise<PaginationAwareObject> {
+    const users = await this.usersRepository.findAll();
 
     return users;
   }
