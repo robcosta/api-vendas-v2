@@ -9,6 +9,9 @@ import ProductsRepository from '@modules/products/infra/typeorm/repositories/Pro
 import { IUsersRepository } from '@modules/users/domain/repositories/IUsersRepository';
 import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
 
+import { IUserTokensRepository } from '@modules/users/domain/repositories/IUserTokensRepository';
+import UserTokensRepository from '@modules/users/infra/typeorm/repositories/UserTokensRepository';
+
 //Customers
 container.registerSingleton<ICustomersRepository>(
   'CustomersRepository',
@@ -25,4 +28,10 @@ container.registerSingleton<IProductsRepository>(
 container.registerSingleton<IUsersRepository>(
   'UsersRepository',
   UsersRepository,
+);
+
+//UserToken
+container.registerSingleton<IUserTokensRepository>(
+  'UserTokensRepository',
+  UserTokensRepository,
 );
