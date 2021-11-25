@@ -1,28 +1,24 @@
 import AppError from '@shared/errors/AppError';
-import path from 'path';
-import fs from 'fs';
-import { getCustomRepository } from 'typeorm';
-import User from '../infra/typeorm/entities/User';
-import UsersRepository from '../infra/typeorm/repositories/UsersRepository';
 import uploadConfig from '@config/upload';
 import DiskStorageProvider from '@shared/providers/StorageProvider/DiskStorageProvider';
-import S3StorageProvidet from '@shared/providers/StorageProvider/S3StorageProvider';
 import S3StorageProvider from '@shared/providers/StorageProvider/S3StorageProvider';
+import { IUpdateAvatar } from '../domain/models/IUpdateAvatar';
+import { IUser } from '../domain/models/IUser';
+import { inject, injectable } from 'tsyringe';
+import { IUsersRepository } from '../domain/repositories/IUsersRepository';
 
-interface IRequest {
-  user_id: string;
-  avatarFilename: string | undefined;
-}
-
+@injectable()
 class UpdateUserAvatarService {
+  constructor(
+    @inject('UsersRepository')
+    private usersRepository: IUsersRepository,
+  ) {}
   public async execute({
     user_id,
     avatarFilename,
-  }: IRequest): Promise<User | undefined> {
-    const usersRepository = getCustomRepository(UsersRepository);
-
+  }: IUpdateAvatar): Promise<IUser | undefined> {
     // Verifica se o usuário existe
-    const user = await usersRepository.findById(user_id);
+    const user = await this.usersRepository.findById(user_id);
     if (!user) {
       throw new AppError('User not found.');
     }
@@ -40,7 +36,7 @@ class UpdateUserAvatarService {
         await storageProvider.deleteFile(user.avatar, 'directory');
       }
       user.avatar = 'defaultAvatar.png';
-      await usersRepository.save(user);
+      await this.usersRepository.save(user);
       throw new AppError('Image not send.');
     }
 
@@ -49,7 +45,7 @@ class UpdateUserAvatarService {
     await storageProvider.deleteFile(avatarFilename, 'tmpFolder');
 
     user.avatar = avatarFilename;
-    await usersRepository.save(user);
+    await this.usersRepository.save(user);
     return user;
   }
 }
