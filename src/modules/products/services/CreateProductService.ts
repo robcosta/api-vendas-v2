@@ -29,7 +29,6 @@ class CreateProductService {
     });
 
     await redisCache.invalidate('api-vendas-PRODUCT_LIST');
-    //await this.productsRepository.save(product);
 
     return product;
   }

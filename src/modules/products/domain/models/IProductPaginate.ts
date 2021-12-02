@@ -1,5 +1,6 @@
 import { IProduct } from './IProduct';
-export interface IListProduct {
+
+export interface IProductPaginate {
   from: number;
   to: number;
   per_page: number;
@@ -7,6 +8,5 @@ export interface IListProduct {
   current_page: number;
   prev_page: number | null;
   next_page: number | null;
-  last_page: number;
   data: IProduct[];
 }

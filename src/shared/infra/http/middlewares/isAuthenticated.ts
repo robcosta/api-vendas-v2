@@ -17,7 +17,7 @@ export default function isAuthenticated(
   const authHeader = request.headers.authorization;
 
   if (!authHeader) {
-    throw new AppError('JWT Token is issing.');
+    throw new AppError('JWT Token is missing.');
   }
   //Composição do token enviado: Bearer token. Bearer não é necessário
   const [, token] = authHeader.split(' ');

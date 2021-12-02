@@ -1,9 +1,11 @@
-import { ICreateProduct } from '@modules/products/domain/models/ICreateProduct';
-import { IProductsId } from '@modules/products/domain/models/IProductsId';
-import { IListProduct } from '@modules/products/domain/models/IListProduct';
-import { IProductsRepository } from '@modules/products/domain/repositories/IProductsRepository';
 import { Repository, In, getRepository } from 'typeorm';
+import { IProductsRepository } from '@modules/products/domain/repositories/IProductsRepository';
 import Product from '../entities/Product';
+import { ICreateProduct } from '@modules/products/domain/models/ICreateProduct';
+import { IUpdateStockProduct } from '@modules/products/domain/models/IUpdateStockProduct';
+import { IProductPaginate } from '@modules/products/domain/models/IProductPaginate';
+import { IFindProduct } from '@modules/products/domain/models/IFindProduct';
+import redisCache from '@shared/cache/RedisCache';
 
 class ProductRepository implements IProductsRepository {
   private ormRepository: Repository<Product>;
@@ -11,7 +13,11 @@ class ProductRepository implements IProductsRepository {
     this.ormRepository = getRepository(Product);
   }
 
-  public async create({ name, price, quantity }: ICreateProduct) {
+  public async create({
+    name,
+    price,
+    quantity,
+  }: ICreateProduct): Promise<Product> {
     const product = this.ormRepository.create({ name, price, quantity });
     await this.ormRepository.save(product);
     return product;
@@ -26,9 +32,22 @@ class ProductRepository implements IProductsRepository {
     await this.ormRepository.remove(product);
   }
 
-  public async findAll(): Promise<IListProduct> {
-    const customers = await this.ormRepository.createQueryBuilder().paginate();
-    return customers as IListProduct;
+  public async updateStock(
+    products: IUpdateStockProduct[],
+  ): Promise<Product[]> {
+    await redisCache.invalidate('api-vendas-PRODUCT_LIST');
+    const productsUpdate = await this.ormRepository.save(products);
+    return productsUpdate;
+  }
+
+  public async findAll(): Promise<Product[]> {
+    const products = await this.ormRepository.find();
+    return products;
+  }
+
+  public async findAllPaginate(): Promise<IProductPaginate> {
+    const products = await this.ormRepository.createQueryBuilder().paginate();
+    return products as IProductPaginate;
   }
 
   public async findById(id: string): Promise<Product | undefined> {
@@ -43,7 +62,7 @@ class ProductRepository implements IProductsRepository {
     return product;
   }
 
-  public async findAllByIds(products: IProductsId[]): Promise<Product[]> {
+  public async findAllByIds(products: IFindProduct[]): Promise<Product[]> {
     const productIds = products.map(product => product.id);
 
     const existentProducts = await this.ormRepository.find({

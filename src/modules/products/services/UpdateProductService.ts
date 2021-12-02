@@ -14,9 +14,9 @@ class UpdateProductService {
 
   public async execute({
     id,
-    name,
-    price,
-    quantity,
+    name = undefined,
+    price = undefined,
+    quantity = undefined,
   }: IUpdateProduct): Promise<IProduct> {
     const product = await this.productsRepository.findById(id);
 
@@ -24,19 +24,18 @@ class UpdateProductService {
       throw new AppError('Product Not Found.');
     }
 
-    const productExists = await this.productsRepository.findByName(name);
-
-    if (productExists && productExists.name === name) {
-      throw new AppError('There is already one product with this name');
+    if (name) {
+      const productExists = await this.productsRepository.findByName(name);
+      if (productExists && productExists.name === name) {
+        throw new AppError('There is already one product with this name');
+      }
     }
 
-    if (name) product.name = name;
-    if (price) product.price = price;
-    if (quantity) product.quantity = quantity;
+    product.name = name ? name : product.name;
+    product.price = price !== undefined ? price : product.price;
+    product.quantity = quantity !== undefined ? quantity : product.quantity;
 
-    //const redisCache = new RedisCache();
     await redisCache.invalidate('api-vendas-PRODUCT_LIST');
-
     await this.productsRepository.save(product);
 
     return product;

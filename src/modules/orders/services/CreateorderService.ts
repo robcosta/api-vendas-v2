@@ -1,33 +1,35 @@
 import AppError from '@shared/errors/AppError';
-import { getCustomRepository, getConnection } from 'typeorm';
-import Order from '../infra/typeorm/entities/Order';
-import OrdersRepository from '@modules/orders/infra/typeorm/repositories/OrdersRepository';
-import CustomersRepository from '@modules/customers/infra/typeorm/repositories/CustomersRepository';
-import ProductRepository from '@modules/products/infra/typeorm/repositories/ProductsRepository';
+import { inject, injectable } from 'tsyringe';
+import { IOrdersRepository } from '../domain/repositories/IOrdersRepository';
+import { ICustomersRepository } from '@modules/customers/domain/repositories/ICustomersRepository';
+import { IProductsRepository } from '@modules/products/domain/repositories/IProductsRepository';
+import { IOrder } from '../domain/models/IOrder';
+import { IRequestCreateOrder } from '../domain/models/IRequestCreateOrder';
+import UpdateProductService from '@modules/products/services/UpdateProductService';
 
-interface IProduct {
-  id: string;
-  price: number;
-  quantity: number;
-}
-
-interface IRequest {
-  customer_id: string;
-  products: IProduct[];
-}
-
+@injectable()
 class CreateOrderService {
-  public async execute({ customer_id, products }: IRequest): Promise<Order> {
-    const ordersRepository = getCustomRepository(OrdersRepository);
-    const customersRepository = getCustomRepository(CustomersRepository);
-    const productsRepository = getCustomRepository(ProductRepository);
+  constructor(
+    @inject('OrdersRepository')
+    private ordersRepository: IOrdersRepository,
 
-    const customerExists = await customersRepository.findById(customer_id);
+    @inject('CustomersRepository')
+    private customersRepository: ICustomersRepository,
+
+    @inject('ProductsRepository')
+    private productsRepository: IProductsRepository,
+  ) {}
+  public async execute({
+    customer_id,
+    products,
+  }: IRequestCreateOrder): Promise<IOrder> {
+    const customerExists = await this.customersRepository.findById(customer_id);
+
     if (!customerExists) {
       throw new AppError('Could not find any customer with the given id.');
     }
 
-    const existsProducts = await productsRepository.findAllByIds(products);
+    const existsProducts = await this.productsRepository.findAllByIds(products);
 
     if (!existsProducts.length) {
       throw new AppError('Could not find any products with the given ids.');
@@ -63,28 +65,47 @@ class CreateOrderService {
       price: existsProducts.filter(p => p.id === product.id)[0].price,
     }));
 
-    const transactionOrder = await getConnection().transaction(async () => {
-      const order = await ordersRepository.createOrder({
-        customer: customerExists,
-        products: serializedProducts,
-      });
-
-      //Ataulizando as quantidades dos produtos na tabela produtos
-      const { order_products } = order;
-
-      const updatedProductQauntity = order_products.map(product => ({
-        id: product.product_id,
-        quantity:
-          existsProducts.filter(p => p.id === product.product_id)[0].quantity -
-          product.quantity,
-      }));
-
-      await productsRepository.save(updatedProductQauntity);
-
-      return order;
+    // const transactionOrder = await getConnection().transaction(
+    //   async transactionalEntityManager => {
+    const order = await this.ordersRepository.create({
+      customer: customerExists,
+      products: serializedProducts,
     });
 
-    return transactionOrder;
+    //Atualizando as quantidades dos produtos na tabela produtos
+    const { order_products } = order;
+
+    const updatedProductsQauntity = order_products.map(product => ({
+      id: product.product_id,
+      quantity:
+        existsProducts.filter(p => p.id === product.product_id)[0].quantity -
+        product.quantity,
+      name: undefined,
+      price: undefined,
+    }));
+
+    const updateProduct = new UpdateProductService(this.productsRepository);
+    updatedProductsQauntity.map(async product => {
+      const name = undefined;
+      const price = undefined;
+      const id = product.id;
+      const quantity = product.quantity;
+      await updateProduct.execute({ id, name, price, quantity });
+    });
+
+    // await this.productsRepository.updateStock(updatedProductsQauntity);
+
+    // await transactionalEntityManager.save(order);
+
+    // products.map(
+    //   async product => await transactionalEntityManager.save(product),
+    // );
+
+    return order;
+    //   },
+    // );
+
+    // return transactionOrder;
   }
 }
 

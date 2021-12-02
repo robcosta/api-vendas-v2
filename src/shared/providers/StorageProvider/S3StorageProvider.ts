@@ -4,7 +4,7 @@ import path from 'path';
 //import sharp from 'sharp';
 import aws, { S3 } from 'aws-sdk';
 import mime from 'mime';
-import ImageSize from '@shared/image/imageSize';
+import ImageSize from '@shared/image/ImageSize';
 
 export default class S3StorageProvider {
   private client: S3;
@@ -16,7 +16,7 @@ export default class S3StorageProvider {
   }
 
   public async saveFile(file: string): Promise<string> {
-    new ImageSize().resizeImage(file);
+    await new ImageSize().resizeImage(file);
     // const imageSize = Number(process.env.IMAGE_SIZE);
     // await sharp(path.join(uploadConfig.tmpFolder, file))
     //   .resize(imageSize)

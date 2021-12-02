@@ -1,6 +1,6 @@
 import redisCache from '@shared/cache/RedisCache';
 import { inject, injectable } from 'tsyringe';
-import { IListProduct } from '../domain/models/IListProduct';
+import { IProductPaginate } from '../domain/models/IProductPaginate';
 import { IProductsRepository } from '../domain/repositories/IProductsRepository';
 
 @injectable()
@@ -10,13 +10,17 @@ class ListProductService {
     private productsRepository: IProductsRepository,
   ) {}
 
-  public async execute(): Promise<IListProduct> {
-    let products = await redisCache.recover<IListProduct>(
+  public async execute(): Promise<IProductPaginate> {
+    // const products = await this.productsRepository.findAllPaginate();
+    let products = await redisCache.recover<IProductPaginate>(
       'api-vendas-PRODUCT_LIST',
     );
 
+    console.log(products);
+
     if (!products) {
-      products = await this.productsRepository.findAll();
+      products = await this.productsRepository.findAllPaginate();
+      console.log('Dentro de !products', products);
       await redisCache.save('api-vendas-PRODUCT_LIST', products);
     }
 
